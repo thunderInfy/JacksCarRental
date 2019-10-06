@@ -1,3 +1,9 @@
+#########################################################################################
+# Copyright (C)                                                       					#
+# 2019 Aditya Rastogi(r.aditya0824@gmail.com)		                  					#
+# Permission given to modify the code as long as you keep this declaration at the top 	#                                              #
+#########################################################################################
+
 #!/usr/bin/env python
 # coding: utf-8
 
