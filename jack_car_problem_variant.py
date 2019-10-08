@@ -1,14 +1,17 @@
-#########################################################################################
-# Copyright (C)                                                       					#
-# 2019 Aditya Rastogi(r.aditya0824@gmail.com)		                  					#
-# Permission given to modify the code as long as you keep this declaration at the top 	#                                              #
-#########################################################################################
-
-
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[6]:
+# In[3]:
+
+
+#############################################################################################
+# Copyright (C)																				#
+# 2019 Aditya Rastogi(r.aditya0824@gmail.com)												#
+# Permission given to modify the code as long as you keep this declaration at the top 		#
+#############################################################################################
+
+
+# In[4]:
 
 
 #IMPORTS
@@ -19,7 +22,7 @@ from scipy.stats import poisson
 import sys
 
 
-# In[1]:
+# In[5]:
 
 
 #Problem Parameters
@@ -45,7 +48,7 @@ class jcp:
         return -4
 
 
-# In[8]:
+# In[6]:
 
 
 class poisson_:
@@ -55,6 +58,8 @@ class poisson_:
         
         ε = 0.01
         
+        
+        # [α , β] is the range of n's for which the pmf value is above ε
         self.α = 0
         state = 1
         self.vals = {}
@@ -79,6 +84,8 @@ class poisson_:
                 else:
                     break    
         
+        # normalizing the pmf, values of n outside of [α, β] have pmf = 0
+        
         added_val = (1-summer)/(self.β-self.α)
         for key in self.vals:
             self.vals[key] += added_val
@@ -93,9 +100,10 @@ class poisson_:
             return Ret_value
 
 
-# In[9]:
+# In[7]:
 
 
+#A class holding the properties of a location together
 class location:
     
     def __init__(self, req, ret):
@@ -105,7 +113,7 @@ class location:
         self.poissonβ = poisson_(self.β)
 
 
-# In[10]:
+# In[8]:
 
 
 #Location initialisation
@@ -114,23 +122,10 @@ A = location(3,3)
 B = location(4,2)
 
 
-# In[11]:
+# In[9]:
 
 
-debugMode = True
-
-
-# In[12]:
-
-
-def debug(d):
-    if debugMode:
-        print(d)
-        sys.stdout.flush()
-
-
-# In[13]:
-
+#Initializing the value and policy matrices. Initial policy has zero value for all states.
 
 value = np.zeros((jcp.max_cars()+1, jcp.max_cars()+1))
 policy = value.copy().astype(int)
@@ -143,7 +138,7 @@ def apply_action(state, action):
     return [max(min(state[0] - action, jcp.max_cars()),0) , max(min(state[1] + action, jcp.max_cars()),0)]
 
 
-# In[15]:
+# In[10]:
 
 
 def expected_reward(state, action):
@@ -157,16 +152,22 @@ def expected_reward(state, action):
     ψ = 0 #reward
     new_state = apply_action(state, action)    
     
+    # adding reward for moving cars from one location to another (which is negative) 
+    
     if action <= 0:
         ψ = ψ + jcp.moving_reward() * abs(action)
     else:
         ψ = ψ + jcp.moving_reward() * (action - 1)    #one car is moved by one of Jack's employees for free
+    
+    # adding reward for second parking lot (which is also negative)
     
     if new_state[0] > 10:
         ψ = ψ + jcp.second_parking_lot_reward()
         
     if new_state[1] > 10:
         ψ = ψ + jcp.second_parking_lot_reward()
+    
+    # there are four discrete random variables which determine the probability distribution of the reward and next state
     
     for Aα in range(A.poissonα.α, A.poissonα.β):
         for Bα in range(B.poissonα.α, B.poissonα.β):
@@ -179,6 +180,8 @@ def expected_reward(state, action):
                     Bβ : sample of cars returned at location B
                     ζ  : probability of this event happening
                     """
+                    
+                    # all four variables are independent of each other
                     ζ = A.poissonα.vals[Aα] * B.poissonα.vals[Bα] * A.poissonβ.vals[Aβ] * B.poissonβ.vals[Bβ]
                     
                     valid_requests_A = min(new_state[0], Aα)
@@ -186,22 +189,25 @@ def expected_reward(state, action):
                     
                     rew = (valid_requests_A + valid_requests_B)*(jcp.credit_reward())
                     
+                    #calculating the new state based on the values of the four random variables
                     new_s = [0,0]
                     new_s[0] = max(min(new_state[0] - valid_requests_A + Aβ, jcp.max_cars()),0)
                     new_s[1] = max(min(new_state[1] - valid_requests_B + Bβ, jcp.max_cars()),0)
                     
+                    #Bellman's equation
                     ψ += ζ * (rew + jcp.γ() * value[new_s[0]][new_s[1]])
                     
     return ψ
 
 
-# In[16]:
+# In[11]:
 
 
 def policy_evaluation():
     
     global value
     
+    # here policy_evaluation has a static variable ε whose values decreases over time
     ε = policy_evaluation.ε
     
     policy_evaluation.ε /= 10 
@@ -219,19 +225,21 @@ def policy_evaluation():
                 δ = max(δ, abs(value[i][j] - old_val))
                 print('.', end = '')
                 sys.stdout.flush()
-        debug(δ)
+        print(δ)
+        sys.stdout.flush()
     
         if δ < ε:
             break
 
 
-# In[ ]:
+# In[12]:
 
 
+#initial value of ε
 policy_evaluation.ε = 50
 
 
-# In[17]:
+# In[13]:
 
 
 def policy_improvement():
