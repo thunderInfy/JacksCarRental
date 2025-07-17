@@ -16,5 +16,4 @@ The resulting policy and value graphs are moved to the folder jcrp_variant_graph
 
 The policy evaluation step of policy iteration can be truncated in several ways without losing the convergence guarantees of policy iteration. One important special case is when policy evaluation is stopped after just one sweep (one update of each state). This algorithm is called value iteration. Output policy and value graphs for value iteration are moved to the folder value_iteration_graphs.
 
-I wrote a blog explaining my solution to this problem. Its link is:
-https://towardsdatascience.com/elucidating-policy-iteration-in-reinforcement-learning-jacks-car-rental-problem-d41b34c8aec7
+I wrote a blog [here](https://medium.com/data-science/solving-racetrack-in-reinforcement-learning-using-monte-carlo-control-bdee2aa4f04e) explaining my solution to this problem.
